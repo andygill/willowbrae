@@ -25,7 +25,6 @@
 
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 <textarea id="commands" rows="40" cols="48" style="position: absolute; right:0px; top:0px">
-A B C 10 D
 </textarea>
 <div style="position: absolute; right:0px; bottom:0px">
  <button>Continue</button>
@@ -57,7 +56,7 @@ function init()
   stats    = { update: function() { return } } 
   renderer = { render: function() { return } }
   controls = { update: function() { return } }
-  return 
+//  return 
 	// SCENE
 	scene = new THREE.Scene();
 	// CAMERA
@@ -125,7 +124,16 @@ function init()
 
 function animate() 
 {
-    requestAnimationFrame( animate );
+  requestAnimationFrame( animate );
+  try { 
+    eval($("#commands").val())
+    $("#commands").addClass("working-border");
+    $("#commands").removeClass("failure-border");
+
+  } catch (ex) { 
+    $("#commands").addClass("failure-border");
+    $("#commands").removeClass("working-border");
+  }
 	render();		
 	update();
 }

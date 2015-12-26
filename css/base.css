@@ -6,3 +6,12 @@ body
 	margin: 0px;
 	overflow: hidden;
 }
+
+.failure-border {
+    border: 10px solid red;
+}
+
+.working-border {
+    border: 1px solid black;
+}
+
