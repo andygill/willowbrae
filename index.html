@@ -32,6 +32,38 @@
 </div>
 
 <script>
+// My utilities
+
+function texture(src) {
+	var floorTexture = new THREE.ImageUtils.loadTexture( src );
+	var floorMaterial = new THREE.MeshBasicMaterial( { 
+      map: floorTexture,     /*  */
+      side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
+  });
+  return floorMaterial
+}
+
+var surfaceCache = {};
+
+function surface(args) {
+  console.log(args,surfaceCache)
+  var src = args.src || "";
+  if (surfaceCache[src]) {
+    var floorMaterial = surfaceCache[src];
+  } else {
+  	var floorTexture = new THREE.ImageUtils.loadTexture( src );
+  	var floorMaterial = new THREE.MeshBasicMaterial( { 
+        map: floorTexture,     /*  */
+        side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
+    });
+    surfaceCache[src] = floorMaterial;
+  }
+  var size = args.size || new THREE.Vector2(100,100)
+	var floorGeometry = new THREE.PlaneGeometry(size.x,size.y);
+	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+  return floor;
+}
+
 /*
 	Template taken from Three.js "tutorials by example" by Lee Stemkoski
  */
@@ -48,6 +80,7 @@ var mesh;
 
 init();
 animate();
+
 
 // FUNCTIONS 		
 function init() 
@@ -68,7 +101,6 @@ function init()
 	camera.position.set(0,150,400);
 	camera.lookAt(scene.position);	
 	// RENDERER
-        console.log(Detector.webgl)
 	if ( Detector.webgl )
 		renderer = new THREE.WebGLRenderer( {antialias:true} );
 	else
@@ -76,9 +108,6 @@ function init()
 	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	container = document.getElementById( 'ThreeJS' );
 	container.appendChild( renderer.domElement );
-	// EVENTS
-//	THREEx.WindowResize(renderer, camera);
-//	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 	// CONTROLS
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
@@ -92,23 +121,15 @@ function init()
 	light.position.set(100,250,100);
 	scene.add(light);
 	// FLOOR
-	var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
-//	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-//	floorTexture.repeat.set( 1, 1 );
-	var floorMaterial = new THREE.MeshBasicMaterial( { 
-      map: floorTexture,     /*  */
-      side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
-  });
-	var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
-	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+
+  var floor = surface(
+        { src: 'images/checkerboard.jpg'
+        , size: new THREE.Vector2(1000,1000)
+        }
+  )
 	floor.position.y = -0.5;
 	floor.rotation.x = Math.PI / 2;
 	scene.add(floor);
-	// SKYBOX
-	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
-	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
-	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
-	scene.add(skyBox);
 	
 	////////////
 	// CUSTOM //
