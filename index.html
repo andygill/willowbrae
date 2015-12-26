@@ -136,7 +136,7 @@ function animate()
   if (fps == null) {
     requestAnimationFrame( animate );
   } else {
-    setTimeout(animate,1000 / fps)
+    setTimeout(function () { requestAnimationFrame( animate ) },1000 / fps)
   }
 	render();		
 	update();
@@ -174,17 +174,18 @@ $(function() {
   }
   gui_ = gui;
 
-  gui.add(window, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
   folder(gui,'Camera',function(g) {
+    g.add(window, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
     g.add(camera, 'fov').onChange(function(value) {
       camera.updateProjectionMatrix()
     })
-    folder(gui,'position',function(g) {
+    folder(g,'position',function(g) {
       g.add(camera.position, 'x')
       g.add(camera.position, 'y')
       g.add(camera.position, 'z')
       return false;
     })
+    return false;
   })
 
 //  f.add(camera, 'fov')//.onChange(function(value) {
