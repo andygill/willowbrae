@@ -24,7 +24,7 @@
 <!-- ------------------------------------------------------------ -->
 
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
-<textarea name="comments" rows="40" cols="48" style="position: absolute; right:0px; top:0px">
+<textarea id="commands" rows="40" cols="48" style="position: absolute; right:0px; top:0px">
 A B C 10 D
 </textarea>
 <div style="position: absolute; right:0px; bottom:0px">
@@ -53,6 +53,11 @@ animate();
 // FUNCTIONS 		
 function init() 
 {
+  // Hack to comment out the 3D view update
+  stats    = { update: function() { return } } 
+  renderer = { render: function() { return } }
+  controls = { update: function() { return } }
+  return 
 	// SCENE
 	scene = new THREE.Scene();
 	// CAMERA
@@ -140,6 +145,102 @@ function render()
 {
 	renderer.render( scene, camera );
 }
+
+$(function() {
+  var mouse = null;
+
+  $(document).on('mousemove',function(e) {
+    // Now try to find where you are
+    if (mouse) { //  && (e.timeStamp - mouse.ts) > 1000) {
+      console.log("body mousemove",$(this),e)
+      // x
+      // From http://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
+      // Converted to JS.
+      var x = mouse.x - e.pageX;
+      var y = mouse.y - e.pageY;
+      var distance = Math.sqrt(x*x + y*y)
+      if (distance > 10) {
+        
+      }
+      
+
+      var dx = e.pageX - mouse.x;
+      var dy = e.pageY - mouse.y;
+      var a = Math.atan2(dy,dx);
+
+      var dpx= mouse.x_-mouse.x;
+      var dpy= mouse.y_-mouse.y;
+      var b=Math.atan2(dpy, dpx);
+
+      var diff  = a-b;
+
+
+      if (diff > Math.PI) {
+          diff -= 2 * Math.PI;
+      } else if (diff < -Math.PI) {
+          diff += 2 * Math.PI;
+      } 
+
+
+      var distance = Math.sqrt(x*x + y*y)
+      var dy = e.pageY - mouse.y;
+
+//      if (distance > 10) {
+//        mouse.val += 0.1 * diff * distance;
+//      }
+      mouse.val = 0.1 * (mouse.x - e.pageX)
+
+//      if (Math.abs(diff) > 1) {
+        console.log("after",mouse, diff,distance)          
+//      }
+
+      mouse.val += diff;
+
+      // Set the value
+      
+      var commands = $("#commands")
+      var begin = commands[0].selectionStart;
+      var end = commands[0].selectionEnd;
+      var val0 = commands.val();
+      var act  = "" + Math.round(parseInt(mouse.sel) + mouse.val)
+      var val1 = val0.substring(0,begin) + act + val0.substring(end) 
+
+      commands.val(val1)
+      commands[0].setSelectionRange(begin,begin + act.length)
+      
+      console.log(commands,begin,end,val0,val1)
+
+      mouse.x_ = e.pageX;
+      mouse.y_ = e.pageY;
+      return false;
+    } else {
+      return true; // need to handle the mouse move somewhere else
+    }
+  })
+  $(document).on('mouseup',function(e) {
+    // Now try to find where you are
+    mouse = null;
+//    console.log("body mousemove",$(this),e)
+    return false;
+  })
+  $("#commands").on('mousedown ',function(e) {
+    var commands = $("#commands")
+    if (e.altKey && commands[0].setSelectionRange) {
+      var sel = commands.val().substring(commands[0].selectionStart,commands[0].selectionEnd)
+      if (!isNaN(sel)) {
+        mouse = { x: e.pageX, y : e.pageY, x_: e.pageX, y_: e.pageY, 
+                  val: 0, ts: e.timeStamp, sel: sel
+        }
+        // Now try to find where you are
+        console.log("#commands mousedown",$(this),e)
+      }
+      return false;
+    } 
+    return true;
+  })
+
+  
+});
 
 </script>
 
