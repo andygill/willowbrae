@@ -162,31 +162,41 @@ $(function() {
   init();
   animate();
 
-  var text = { message: "Hello!" }
-  var gui = new dat.GUI();
+//  var gui = new dat.GUI();
 
-  function folder(gui,name,code) {
-    var g = gui.addFolder(name);
-    var r = code(g);
-    if (r != false) {
-      g.open();
+  var GUI = function(gui) {
+    this.gui = gui || new dat.GUI();
+
+    this.folder = function folder(name,code) {
+      var g = new GUI(this.gui.addFolder(name))
+      var r = code.call(g);
+      if (r == true) {
+        g.gui.open();
+      }
+    }
+
+    this.add = function () { 
+      return this.gui.add.apply(this.gui,arguments)
     }
   }
-  gui_ = gui;
 
-  folder(gui,'Camera',function(g) {
-    g.add(window, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
-    g.add(camera, 'fov').onChange(function(value) {
+  var gui = new GUI();
+
+  gui_ = gui
+  gui.folder("Camera",function() {
+    this.add(window, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
+    this.add(camera, 'fov').listen().onChange(function(value) {
       camera.updateProjectionMatrix()
     })
-    folder(g,'position',function(g) {
-      g.add(camera.position, 'x')
-      g.add(camera.position, 'y')
-      g.add(camera.position, 'z')
-      return false;
+    this.folder('position',function() {
+      this.add(camera.position, 'x').listen();
+      this.add(camera.position, 'y').listen();
+      this.add(camera.position, 'z').listen();
     })
-    return false;
+    return true;
   })
+  
+  
 });
 
 </script>
