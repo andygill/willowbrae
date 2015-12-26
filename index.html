@@ -15,6 +15,7 @@
 <script src="js/KeyboardState.js"></script>
 <script src="js/THREEx.FullScreen.js"></script>
 <script src="js/THREEx.WindowResize.js"></script>
+<script type="text/javascript" src="dat.gui.min.js"></script>
 
 <!-- Code to display an information button and box when clicked. -->
 <script src="js/jquery-1.9.1.js"></script>
@@ -72,9 +73,6 @@ var clock = new THREE.Clock();
 // custom global variables
 var mesh;
 
-init();
-animate();
-
 
 // FUNCTIONS 		
 function init() 
@@ -131,9 +129,15 @@ function init()
 	
 }
 
+fps = null;
+
 function animate() 
 {
-  requestAnimationFrame( animate );
+  if (fps == null) {
+    requestAnimationFrame( animate );
+  } else {
+    setTimeout(animate,1000 / fps)
+  }
 	render();		
 	update();
 }
@@ -155,6 +159,50 @@ function render()
 }
 
 $(function() {
+  init();
+  animate();
+
+  var text = { message: "Hello!" }
+  var gui = new dat.GUI();
+
+  function folder(gui,name,code) {
+    var g = gui.addFolder(name);
+    var r = code(g);
+    if (r != false) {
+      g.open();
+    }
+  }
+  gui_ = gui;
+
+  gui.add(window, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
+  folder(gui,'Camera',function(g) {
+    g.add(camera, 'fov').onChange(function(value) {
+      camera.updateProjectionMatrix()
+    })
+    folder(gui,'position',function(g) {
+      g.add(camera.position, 'x')
+      g.add(camera.position, 'y')
+      g.add(camera.position, 'z')
+      return false;
+    })
+  })
+
+//  f.add(camera, 'fov')//.onChange(function(value) {
+/*
+  var text = { message: "Hello" }
+  (function(f) {
+//     camera.updateProjectionMatrix()
+//    })
+//    var f = gui.addFolder('position')
+//    (function(g) {
+//      g.add(camera.position, 'x')//.onChange(function(value) {
+//       camera.updateProjectionMatrix()
+//      })
+//    })
+    (gui.addFolder('position'));
+    f.open()
+  })(gui.addFolder('Camera'));
+*/
 });
 
 </script>
