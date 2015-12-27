@@ -41,3 +41,6 @@ function world(scene, gui) {
     mesh.position.set(0,40,0);
     scene.add(mesh);
 }
+
+function world_update(scene,gui) {
+}
