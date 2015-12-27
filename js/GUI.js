@@ -13,4 +13,9 @@ var GUI = function(gui) {
   this.add = function () { 
     return this.gui.add.apply(this.gui,arguments)
   }
+
+  //gui.variable('floor.position',floor.position,'x',0.5)
+  this.variable = function(name,rhs,field) {
+      this.add(rhs, field)
+  }
 }
