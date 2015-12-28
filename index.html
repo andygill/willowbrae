@@ -98,8 +98,10 @@ function init()
 	stats.domElement.style.zIndex = 100;
 	container.appendChild( stats.domElement );
 
+  X.scene = scene
+  X.gui   = gui
   // The world contents
- world(scene, gui)  	
+  X.main()
   // The controller
   
   gui.folder("Camera",function() {
@@ -130,7 +132,7 @@ function animate()
   }
 	render();		
 	update();
-  world_update(scene, gui);
+//  world_update(scene, gui);
 }
 
 function update()

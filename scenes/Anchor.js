@@ -1,4 +1,7 @@
-function world(scene, gui) {
+X.main = function () {
+    var scene = this.scene
+    var gui   = this.gui
+
     // LIGHT
     var light = new THREE.PointLight(0xffffff);
     light.position.set(100,250,100);
@@ -15,19 +18,7 @@ function world(scene, gui) {
             var x_pt = x - (columns - 1) / 2
             var y_pt = y - (rows - 1) / 2
 
-/*
-            var point = new THREE.Object3D();
-            scene.animate.push(point)
-
-             var anchor = new THREE.SphereGeometry( 5, 4, 4 );
-            var material = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe: true } );
-            mesh = new THREE.Mesh( anchor, material );
-            point.add(mesh);
-            scene.add(point);
-            floor.position.set(80 * 0.5 * x_pt,60 * 0.5 * y_pt,0);
-
-*/
-            var floor = surface(
+            var floor = this.card(
                 { // src:  'images/checkerboard.jpg' 
                     // From https://en.wikipedia.org/wiki/Portable_Network_Graphics
                     src: 'images/PNG_transparency_demonstration_1.png'
@@ -40,8 +31,8 @@ function world(scene, gui) {
             scene.animate.push(floor)
         }
     }
-
 }
+
 
 function world_update(scene,gui) {
     for(var i in scene.animate) {
