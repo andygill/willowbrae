@@ -26,68 +26,17 @@ function world(scene, gui) {
             point.add(mesh);
 
             var floor = surface(
-                  { src: 'images/checkerboard.jpg'
-                  , size: new THREE.Vector2(50,50)
-                  }
+                { // src:  'images/checkerboard.jpg' 
+                    // From https://en.wikipedia.org/wiki/Portable_Network_Graphics
+                    src: 'images/PNG_transparency_demonstration_1.png'
+                , size: new THREE.Vector2(80,60)
+                }
             )
-            floor.position.set(25 * x_pt,25 * y_pt,0);
+            floor.position.set(80 * 0.5 * x_pt,60 * 0.5 * y_pt,0);
             point.add(floor)
         }
     }
 
-/*
-    var floor = surface(
-          { src: 'images/checkerboard.jpg'
-          , size: new THREE.Vector2(1000,1000)
-          }
-    )
-    floor.position.x = 0.5
-    floor.rotation.x = Math.PI / 2; // Rotations happend before the position is moved
-//    scene.add(floor);
-
-    // parent/pivot taken from http://jsfiddle.net/t83pzoj2/
-	parent = new THREE.Object3D();
-	scene.add( parent );
-
-    // pivot
-	pivot = new THREE.Object3D();
-	parent.add( pivot );
-
-    var floor2 = surface(
-          { src: 'images/checkerboard.jpg'
-          , size: new THREE.Vector2(100,100)
-          }
-    )
-
-    floor2.position.y = -100.5;
-    floor2.rotation.x = 0;
-    floor2.rotation.z = 0.1;
-
-    gui.folder('position',function() {
-      this.add(floor2.position, 'y',-200,200).listen();
-    })
-
-//    scene.add(floor2);
-    debug.floor2 = floor2
-
-	floor.position.y = 100;
-//    floor.scale.multiplyScalar( 4 );
-
-	parent.add( floor );
-	pivot.add( floor2 );
-
-
-
-    ////////////
-    // CUSTOM //
-    ////////////
-
-    var geometry = new THREE.SphereGeometry( 30, 32, 16 );
-    var material = new THREE.MeshLambertMaterial( { color: 0x990088 } );
-    mesh = new THREE.Mesh( geometry, material );
-    mesh.position.set(0,40,0);
-    scene.add(mesh);
-*/
 }
 
 function world_update(scene,gui) {
