@@ -13,19 +13,21 @@
 
   // Public function: adds a cardboard 'card' to the world
   X.card = function (args) {
-    console.log(args,surfaceCache)
+      //    console.log(args,surfaceCache)
     var src = args.src || "";
     if (surfaceCache[src]) {
       var floorMaterial = surfaceCache[src];
     } else {
     	var floorTexture = new THREE.ImageUtils.loadTexture( src );
     	var floorMaterial = new THREE.MeshBasicMaterial( { 
-          map: floorTexture,     /*  */
-          side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
+		        side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
       });
-      surfaceCache[src] = floorMaterial;
+	     surfaceCache[src] = floorMaterial;
     }
     floorMaterial.transparent = true;
+    floorMaterial.depthWrite = false // Artifacts also disappear when seting depthTest to false
+    floorMaterial.map = floorTexture
+    floorMaterial.needsUpdate = true // This is needed
     var size   = args.size   || new THREE.Vector2(100,100)
     var anchor = args.anchor || new THREE.Vector2(size.x * 0.5, size.y * 0.5)
 
