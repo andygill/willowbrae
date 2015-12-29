@@ -33,11 +33,13 @@ X.main = function () {
     }
 }
 
-
-function world_update(scene,gui) {
-    for(var i in scene.animate) {
+// Need to figure out something better than this
+X.update2 = X.update;
+X.update = function() {
+    X.update2()
+    for(var i in X.scene.animate) {
 //        console.log("i world_update",i)
-        scene.animate[i].rotation.x += 0.005
-        scene.animate[i].rotation.y += 0.005
+        X.scene.animate[i].rotation.x += 0.005
+        X.scene.animate[i].rotation.y += 0.005
     }
 }
