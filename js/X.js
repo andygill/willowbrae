@@ -9,6 +9,35 @@
   X.gui    = null
 
   X.init = function () {
+    var gui = X.gui = new GUI();
+        
+  	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+  	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+
+  	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+  	scene.add(camera);
+  	camera.position.set(0,150,400);
+  	camera.lookAt(scene.position);	
+
+  	if ( Detector.webgl )
+  		renderer = new THREE.WebGLRenderer( {antialias:false, alpha: true } );
+  	else
+  		renderer = new THREE.CanvasRenderer(); 
+  	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+  	container = document.getElementById( 'ThreeJS' );
+  	container.appendChild( renderer.domElement );
+    // EVENTS
+    THREEx.WindowResize(renderer, camera);
+  //  THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+  	// CONTROLS
+  	controls = new THREE.OrbitControls( camera, renderer.domElement );
+  	// STATS
+
+  	stats = new Stats();
+  	stats.domElement.style.position = 'absolute';
+  	stats.domElement.style.bottom = '0px';
+  	stats.domElement.style.zIndex = 100;
+  	container.appendChild( stats.domElement );
 
     X.main()
     // The controller
