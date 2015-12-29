@@ -1,16 +1,27 @@
 // Wrapper for the THREE.js library
+
+/*
+	Template originally taken from Three.js "tutorials by example" by Lee Stemkoski,
+  though it has been though many changes now.
+ */
+
 (function () {
 
   X = {}
 
   // library-global
-  X.camera = null
-  X.scene  = null
-  X.gui    = null
+  var keyboard = X.keyboard = new KeyboardState();
+  var clock = X.keyboard = new THREE.Clock();
 
   X.init = function () {
+
+
     var gui = X.gui = new GUI();
         
+  	// SCENE
+  	var scene = X.scene = new THREE.Scene();
+
+  	// CAMERA
   	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
   	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 
@@ -20,9 +31,9 @@
   	camera.lookAt(scene.position);	
 
   	if ( Detector.webgl )
-  		renderer = new THREE.WebGLRenderer( {antialias:false, alpha: true } );
+  		renderer = X.renderer = new THREE.WebGLRenderer( {antialias:false, alpha: true } );
   	else
-  		renderer = new THREE.CanvasRenderer(); 
+  		renderer = X.renderer = new THREE.CanvasRenderer(); 
   	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
   	container = document.getElementById( 'ThreeJS' );
   	container.appendChild( renderer.domElement );
@@ -57,6 +68,25 @@
     })    
 
   }
+
+
+  X.render = function () 
+  {
+  	X.renderer.render( scene, camera );
+  }
+
+  X.update = function()
+  {
+  	if ( keyboard.pressed("z") ) 
+  	{	  
+      console.log("z pressed")
+  		// do something
+  	}
+	
+  	controls.update();
+  	stats.update();
+  }
+
 
 
   // Should be called 

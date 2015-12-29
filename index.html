@@ -49,10 +49,6 @@ function texture(src) {
 }
 
 
-/*
-	Template taken from Three.js "tutorials by example" by Lee Stemkoski
- */
-
 // MAIN
 
 // standard global variables
@@ -75,14 +71,14 @@ function init()
 	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 	// RENDERER
 
-  X.scene = scene
+//  X.scene = scene
 //  X.gui   = gui
-  X.camera = camera
+//  X.camera = camera
   // The world contents
   X.init()
+ scene = X.scene
   
 }
-
 
 function animate() 
 {
@@ -91,26 +87,12 @@ function animate()
   } else {
     setTimeout(function () { requestAnimationFrame( animate ) },1000 / fps)
   }
-	render();		
-	update();
+	X.render();		
+	X.update();
 //  world_update(scene, gui);
 }
 
-function update()
-{
-	if ( keyboard.pressed("z") ) 
-	{	  
-		// do something
-	}
-	
-	controls.update();
-	stats.update();
-}
 
-function render() 
-{
-	renderer.render( scene, camera );
-}
 
 $(function() {
   init();
