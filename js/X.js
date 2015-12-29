@@ -12,6 +12,7 @@
   // library-global
   var keyboard = X.keyboard = new KeyboardState();
   var clock = X.keyboard = new THREE.Clock();
+  var fps = X.fps = null;
 
   X.init = function () {
 
@@ -25,7 +26,7 @@
   	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
   	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 
-  	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+  	camera = X.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
   	scene.add(camera);
   	camera.position.set(0,150,400);
   	camera.lookAt(scene.position);	
@@ -55,7 +56,7 @@
 
 
     X.gui.folder("Camera",function() {
-      this.add(window, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
+      this.add(X, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
       this.add(camera, 'fov').listen().onChange(function(value) {
         camera.updateProjectionMatrix()
       })
@@ -69,10 +70,21 @@
 
   }
 
+  X.animate = function ()
+  {
+    if (fps == null) {
+      requestAnimationFrame( X.animate );
+    } else {
+      setTimeout(function () { requestAnimationFrame( X.animate ) },1000 / fps)
+    }
+  	X.render();		
+  	X.update();
+  }
+
 
   X.render = function () 
   {
-  	X.renderer.render( scene, camera );
+  	X.renderer.render( X.scene, X.camera );
   }
 
   X.update = function()

@@ -36,69 +36,10 @@
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 
 <script>
-// My utilities
-
-debug = {}
-function texture(src) {
-	var floorTexture = new THREE.ImageUtils.loadTexture( src );
-	var floorMaterial = new THREE.MeshBasicMaterial( { 
-      map: floorTexture,     /*  */
-      side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
-  });
-  return floorMaterial
-}
-
-
-// MAIN
-
-// standard global variables
-var container, scene, camera, renderer, controls, stats;
-var keyboard = new KeyboardState();
-var clock = new THREE.Clock();
-
-// custom global variables
-var mesh;
-
-var fps = null;
-
-// FUNCTIONS 		
-function init() 
-{
-	// SCENE
-	scene = new THREE.Scene();
-	// CAMERA
-	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
-	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
-	// RENDERER
-
-//  X.scene = scene
-//  X.gui   = gui
-//  X.camera = camera
-  // The world contents
-  X.init()
- scene = X.scene
-  
-}
-
-function animate() 
-{
-  if (fps == null) {
-    requestAnimationFrame( animate );
-  } else {
-    setTimeout(function () { requestAnimationFrame( animate ) },1000 / fps)
-  }
-	X.render();		
-	X.update();
-//  world_update(scene, gui);
-}
-
-
-
 $(function() {
-  init();
-  animate();
+  X.init();
+  X.animate();
 });
-
 </script>
 
 </body>
