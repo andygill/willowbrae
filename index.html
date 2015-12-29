@@ -100,26 +100,10 @@ function init()
 
   X.scene = scene
   X.gui   = gui
+  X.camera = camera
   // The world contents
-  X.main()
-  // The controller
+  X.init()
   
-  gui.folder("Camera",function() {
-    this.add(window, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
-    this.add(camera, 'fov').listen().onChange(function(value) {
-      camera.updateProjectionMatrix()
-    })
-    this.folder('position',function() {
-      this.add(camera.position, 'x').listen();
-      this.add(camera.position, 'y').listen();
-      this.add(camera.position, 'z').listen();
-    })
-    return true;
-  })
-  
-  
-
-
 }
 
 

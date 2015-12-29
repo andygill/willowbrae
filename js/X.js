@@ -8,6 +8,28 @@
   X.scene  = null
   X.gui    = null
 
+  X.init = function () {
+
+    X.main()
+    // The controller
+
+
+    X.gui.folder("Camera",function() {
+      this.add(window, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
+      this.add(camera, 'fov').listen().onChange(function(value) {
+        camera.updateProjectionMatrix()
+      })
+      this.folder('position',function() {
+        this.add(camera.position, 'x').listen();
+        this.add(camera.position, 'y').listen();
+        this.add(camera.position, 'z').listen();
+      })
+      return true;
+    })    
+
+  }
+
+
   // Should be called 
   var surfaceCache = {};
 
