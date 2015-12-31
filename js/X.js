@@ -11,7 +11,7 @@
 
   // library-global
   var keyboard = X.keyboard = new KeyboardState();
-  var clock = X.keyboard = new THREE.Clock();
+  var clock = X.clock = new THREE.Clock();
   X.fps = null;
 
   X.init = function () {
@@ -89,7 +89,10 @@
 
   X.update = function()
   {
-  	if ( keyboard.pressed("z") ) 
+//    console.log("X.update")
+    X.keyboard.update()
+
+  	if ( X.keyboard.pressed("Z") ) 
   	{	  
       console.log("z pressed")
   		// do something
