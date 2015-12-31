@@ -12,7 +12,7 @@
   // library-global
   var keyboard = X.keyboard = new KeyboardState();
   var clock = X.keyboard = new THREE.Clock();
-  var fps = X.fps = null;
+  X.fps = null;
 
   X.init = function () {
 
@@ -72,10 +72,10 @@
 
   X.animate = function ()
   {
-    if (fps == null) {
+    if (X.fps == null) {
       requestAnimationFrame( X.animate );
     } else {
-      setTimeout(function () { requestAnimationFrame( X.animate ) },1000 / fps)
+      setTimeout(function () { requestAnimationFrame( X.animate ) },1000 / X.fps)
     }
   	X.render();		
   	X.update();
