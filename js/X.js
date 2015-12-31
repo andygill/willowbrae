@@ -32,7 +32,7 @@
   	camera.lookAt(scene.position);	
 
   	if ( Detector.webgl )
-  		renderer = X.renderer = new THREE.WebGLRenderer( {antialias:false, alpha: true } );
+  		renderer = X.renderer = new THREE.WebGLRenderer( {antialias:true, alpha: true } );
   	else
   		renderer = X.renderer = new THREE.CanvasRenderer(); 
   	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -111,10 +111,14 @@
   X.card = function (args) {
       //    console.log(args,surfaceCache)
     var src = args.src || "";
+    var size   = args.size   || new THREE.Vector2(100,100)
+    var anchor = args.anchor || new THREE.Vector2(size.x * 0.5, size.y * 0.5)
     if (surfaceCache[src] || false) {
       var floorMaterial = surfaceCache[src];
     } else {
     	var floorTexture = new THREE.ImageUtils.loadTexture( src );
+      // This is needed for non-POT images
+      floorTexture.minFilter = THREE.LinearFilter
     	var floorMaterial = new THREE.MeshBasicMaterial( { 
 		        side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
       });
@@ -124,8 +128,6 @@
       floorMaterial.needsUpdate = true // This is needed
 	    surfaceCache[src] = floorMaterial;
     }
-    var size   = args.size   || new THREE.Vector2(100,100)
-    var anchor = args.anchor || new THREE.Vector2(size.x * 0.5, size.y * 0.5)
 
     // We always create an anchor, and fasten our surface to this anchor.
     var center = new THREE.Object3D();
