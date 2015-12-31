@@ -6,8 +6,8 @@ X.main = function () {
     var light = new THREE.PointLight(0xffffff);
     light.position.set(100,250,100);
     scene.add(light);
-    // FLOOR
 
+    // FLOOR
     var rows = columns = 3;
     var scale = 100;
     scene.animate = [];
@@ -19,11 +19,10 @@ X.main = function () {
             var y_pt = y - (rows - 1) / 2
 
             var floor = this.card(
-                { // src:  'images/checkerboard.jpg' 
-                    // From https://en.wikipedia.org/wiki/Portable_Network_Graphics
-                    src: 'images/PNG_transparency_demonstration_1.png'
+                // From https://en.wikipedia.org/wiki/Portable_Network_Graphics
+                { src: 'images/PNG_transparency_demonstration_1.png'
                 , size: new THREE.Vector2(80,60)
-                    , anchor: new THREE.Vector2(80 * x / (columns - 1), 60 * y / (rows - 1))
+                , anchor: new THREE.Vector2(80 * x / (columns - 1), 60 * y / (rows - 1))
                 }
             )
             floor.position.set(scale * x_pt,scale * y_pt,0);
