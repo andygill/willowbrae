@@ -143,6 +143,7 @@
     mesh = new THREE.Mesh( sphere, material );
     center.add(mesh); 
  
+    center.card = floor
     return center;
   }
 
@@ -151,4 +152,3 @@
   X.animation = function () {}
   
 })();
-
