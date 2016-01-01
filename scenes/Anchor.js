@@ -1,6 +1,8 @@
-X.main = function () {
-    var scene = this.scene
-    var gui   = this.gui
+var ANCHOR = { };
+
+ANCHOR.init = function (t) {
+    var scene = t.scene
+    var gui   = t.gui
 
     // LIGHT
     var light = new THREE.PointLight(0xffffff);
@@ -10,7 +12,7 @@ X.main = function () {
     // FLOOR
     var rows = columns = 3;
     var scale = 100;
-    scene.animate = [];
+    t.animate2 = [];
 
     for(var x = 0; x < columns; x++) {
         for(var y = 0; y < rows; y++) {
@@ -18,7 +20,7 @@ X.main = function () {
             var x_pt = x - (columns - 1) / 2
             var y_pt = y - (rows - 1) / 2
 
-            var floor = this.card(
+            var floor = t.card(
                 // From https://en.wikipedia.org/wiki/Portable_Network_Graphics
                 { src: 'images/PNG_transparency_demonstration_1.png'
                 , size: new THREE.Vector2(80,60)
@@ -26,11 +28,24 @@ X.main = function () {
                 }
             )
             floor.position.set(scale * x_pt,scale * y_pt,0);
-            scene.add(floor)
-            scene.animate.push(floor)
+            floor.update = function () {
+              this.rotation.x += 0.005
+              this.rotation.y += 0.005
+            }
+            t.add(floor)
         }
     }
-}
+};
+
+ANCHOR.update = function (t) {
+  for(var i in t.animate2) {
+      console.log("i world_update",i)
+      t.animate2[i].rotation.x += 0.005
+      t.animate2[i].rotation.y += 0.005
+  }
+};
+
+/*
 
 // Need to figure out something better than this
 X.update2 = X.update;
@@ -42,3 +57,4 @@ X.update = function() {
         X.scene.animate[i].rotation.y += 0.005
     }
 }
+*/
