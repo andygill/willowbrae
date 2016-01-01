@@ -37,24 +37,3 @@ ANCHOR.init = function (t) {
     }
 };
 
-ANCHOR.update = function (t) {
-  for(var i in t.animate2) {
-      console.log("i world_update",i)
-      t.animate2[i].rotation.x += 0.005
-      t.animate2[i].rotation.y += 0.005
-  }
-};
-
-/*
-
-// Need to figure out something better than this
-X.update2 = X.update;
-X.update = function() {
-    X.update2()
-    for(var i in X.scene.animate) {
-//        console.log("i world_update",i)
-        X.scene.animate[i].rotation.x += 0.005
-        X.scene.animate[i].rotation.y += 0.005
-    }
-}
-*/
