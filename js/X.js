@@ -23,7 +23,12 @@ if ( typeof define === 'function' && define.amd ) {
 // though it has been though many changes now.
 
 
-WILLOWBRAE.Theater = function ( ) {
+// Not sure this should all be done in the constructor
+
+// opts.init = function(Theater t) { initial objects }
+
+
+WILLOWBRAE.Theater = function ( opts ) {
   var that = this
 
   var keyboard = this.keyboard = new KeyboardState();
@@ -65,6 +70,10 @@ WILLOWBRAE.Theater = function ( ) {
 	stats.domElement.style.zIndex = 100;
 	container.appendChild( stats.domElement );
 
+  if (typeof opts.init == 'function') {
+    opts.init(this)
+  }
+
   this.gui.folder("Camera",function() {
     this.add(that, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
     this.add(that.camera, 'fov').listen().onChange(function(value) {
@@ -78,6 +87,8 @@ WILLOWBRAE.Theater = function ( ) {
     return true;
   })    
   
+  this.animate()
+
   return this
 
 };

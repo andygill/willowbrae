@@ -37,12 +37,7 @@
 
 <script>
 $(function() {
-  t = new WILLOWBRAE.Theater()
-  ANCHOR.init(t)
-  t.animate()
-  
-//  X.init();
-//  X.animate();
+  t = new WILLOWBRAE.Theater({ init: ANCHOR.init })
 });
 </script>
 
