@@ -17,9 +17,34 @@ Example.init = function (t) {
           , size: new THREE.Vector2(512,512)
           }
     )
-    floor.position.x = 0.5
     floor.rotation.x = Math.PI / 2; // Rotations happend before the position is moved
     t.add(floor);
+
+    var back_wall = t.card(
+          { src: 'images/checkerboard.jpg'
+          , size: new THREE.Vector2(512,256)
+          , anchor: new THREE.Vector2(512 / 2, 256)
+          }
+    )
+    back_wall.position.z -= 256
+    t.add(back_wall);
+
+
+    var left_wall = t.card(
+          { src: 'images/green_wall.jpeg'
+          , size: new THREE.Vector2(512,256)
+          , anchor: new THREE.Vector2(512 / 2, 256)
+          }
+    )
+    left_wall.rotation.y = Math.PI / 2; // Rotations happend before the position is moved
+    left_wall.position.x = -256
+    t.add(left_wall);
+
+    t.gui.folder('walks',function() {
+      this.add(left_wall.position, 'x').min(-256).max(256).step(16)
+      return true
+    })
+
 
     ////////////
     // CUSTOM //
