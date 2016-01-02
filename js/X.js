@@ -161,61 +161,56 @@ WILLOWBRAE.Theater.prototype = {
       var floorMaterial = this.surfaceCache[src];
     } else {
     	var floorTexture = new THREE.ImageUtils.loadTexture( src );
-      var floorSpec = args.spec && new THREE.ImageUtils.loadTexture( args.spec );
+      var floorSpec = args.specular && new THREE.ImageUtils.loadTexture( args.specular );
 
-      // This is needed for non-POT images
-      if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
-        floorTexture.minFilter = THREE.LinearFilter
-        if (floorSpec) { floorSpec.minFilter = THREE.LinearFilter }
-      }
-      if (args.repeat) {
-        floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-        floorTexture.repeat = args.repeat
-        if (floorSpec) { 
-          floorSpec.wrapS = floorSpec.wrapT = THREE.RepeatWrapping; 
-          floorSpec.repeat = args.repeat
+      function update() {
+        this.minFilter = THREE.LinearFilter
+        // This is needed for non-POT images
+        if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
+          this.minFilter = THREE.LinearFilter
+        }
+        if (args.repeat) {
+          this.wrapS = this.wrapT = THREE.RepeatWrapping; 
+          this.repeat = args.repeat
         }
       }
 
-      if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
-        floorTexture.minFilter = THREE.LinearFilter
-        if (floorSpec) { 
-          floorSpec.minFilter = THREE.LinearFilter
-        }
-      }
-
-      if (args.repeat) {
-        floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-        floorTexture.repeat = args.repeat
-        if (floorSpec) { 
-          floorSpec.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-          floorSpec.repeat = args.repeat
-        }
-      }
+      update.call(floorTexture)
+      if (floorSpec) { update.call(floorSpec) }
 
     	var floorMaterial = new THREE.MeshBasicMaterial( { 
-		        side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
+		        side: THREE.SingleSide /* both sides of this mesh are drawn */ 
+      });
+    	var backMaterial = new THREE.MeshBasicMaterial( { 
+		        side: THREE.BackSide /* both sides of this mesh are drawn */ 
       });
 
       floorMaterial.transparent = true;
-      floorMaterial.depthWrite = false // Artifacts also disappear when seting depthTest to false
+//      floorMaterial.depthWrite = false // Artifacts also disappear when seting depthTest to false
       floorMaterial.map = floorTexture
       if (floorSpec) { 
         floorMaterial.specularMap = floorSpec
       }
       floorMaterial.needsUpdate = true // This is needed
-	    this.surfaceCache[src] = floorMaterial;
+      backMaterial.wireframe = true
+      backMaterial.needsUpdate = true // This is needed
+
+//	    this.surfaceCache[src] = floorMaterial;
     }
 
     // We always create an anchor, and fasten our surface to this anchor.
     var center = new THREE.Object3D();
     var floorGeometry = new THREE.PlaneGeometry(size.x,size.y);
     var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    var floorGeometry = new THREE.PlaneGeometry(size.x,size.y,2,2);
+    var back = new THREE.Mesh(floorGeometry, backMaterial);
 
 //    console.log("anchor size",anchor,size)
 //    console.log((0.5 * size.x) - anchor.x ,- (0.5 * size.y) + anchor.y,0);
     floor.position.set((0.5 * size.x) - anchor.x ,-(0.5 * size.y) + anchor.y,0);
     center.add(floor);
+    back.position.set((0.5 * size.x) - anchor.x ,-(0.5 * size.y) + anchor.y,-1);
+    center.add(back);
 
     var sphere = new THREE.SphereGeometry( 5, 4, 4 );
     var material = new THREE.MeshBasicMaterial( { color: 0x000000} );
