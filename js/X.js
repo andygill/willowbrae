@@ -33,7 +33,7 @@ WILLOWBRAE.Theater = function ( opts ) {
 
   var keyboard = this.keyboard = new KeyboardState();
   var clock    = this.clock    = new THREE.Clock();
-  var fps      = this.fps     = null;
+  var fps      = this.fps      = opts.fps || null;
 
   // GUI
   var gui = this.gui = new GUI();
@@ -47,8 +47,11 @@ WILLOWBRAE.Theater = function ( opts ) {
 	var camera = this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 
 	scene.add(camera);
-	camera.position.set(0,150,400);
-	camera.lookAt(scene.position);	
+	camera.position.set(0,150,200);
+  var center = this.center = scene.position.clone();
+  center.y += 150; // look straight ahead
+	camera.lookAt(center)
+  
 
 	if ( Detector.webgl )
 		var renderer = this.renderer = new THREE.WebGLRenderer( {antialias:true, alpha: true } );
@@ -62,6 +65,7 @@ WILLOWBRAE.Theater = function ( opts ) {
 //  THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 	// CONTROLS
 	var controls = this.controls = new THREE.OrbitControls( camera, renderer.domElement );
+  controls.center.y = 150;
 	// STATS
 
 	var stats = this.stats = new Stats();
@@ -150,17 +154,23 @@ WILLOWBRAE.Theater.prototype = {
   card: function (args) {
       //    console.log(args,surfaceCache)
     var src = args.src || "";
-    var size   = args.size   || new THREE.Vector2(100,100)
+    var size   = args.size   || new THREE.Vector2(128,128)
     var anchor = args.anchor || new THREE.Vector2(size.x * 0.5, size.y * 0.5)
     if (this.surfaceCache[src] || false) {
       var floorMaterial = this.surfaceCache[src];
     } else {
     	var floorTexture = new THREE.ImageUtils.loadTexture( src );
       // This is needed for non-POT images
-      floorTexture.minFilter = THREE.LinearFilter
+      if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
+        floorTexture.minFilter = THREE.LinearFilter
+      }
+      floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+      floorTexture.repeat.set( 4, 4 );
+
     	var floorMaterial = new THREE.MeshBasicMaterial( { 
 		        side: THREE.DoubleSide /* both sides of this mesh are drawn */ 
       });
+
       floorMaterial.transparent = true;
       floorMaterial.depthWrite = false // Artifacts also disappear when seting depthTest to false
       floorMaterial.map = floorTexture
@@ -173,9 +183,8 @@ WILLOWBRAE.Theater.prototype = {
     var floorGeometry = new THREE.PlaneGeometry(size.x,size.y);
     var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 
-    console.log("anchor size",anchor,size)
-
-    console.log((0.5 * size.x) - anchor.x ,- (0.5 * size.y) + anchor.y,0);
+//    console.log("anchor size",anchor,size)
+//    console.log((0.5 * size.x) - anchor.x ,- (0.5 * size.y) + anchor.y,0);
     floor.position.set((0.5 * size.x) - anchor.x ,-(0.5 * size.y) + anchor.y,0);
     center.add(floor);
 
@@ -201,7 +210,7 @@ WILLOWBRAE.Theater.prototype = {
   X.fps = null;
 
   X.init = function () {
-
+/*
 
     var gui = X.gui = new GUI();
         
@@ -253,7 +262,7 @@ WILLOWBRAE.Theater.prototype = {
       })
       return true;
     })    
-
+*/
   }
 
   X.animate = function ()
