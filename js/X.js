@@ -157,7 +157,7 @@ WILLOWBRAE.Theater.prototype = {
     var src = args.src || "";
     var size   = args.size   || new THREE.Vector2(128,128)
     var anchor = args.anchor || new THREE.Vector2(size.x * 0.5, size.y * 0.5)
-    if (this.surfaceCache[src] || false) {
+    if (this.surfaceCache[src] && false) {
       var floorMaterial = this.surfaceCache[src];
     } else {
     	var floorTexture = new THREE.ImageUtils.loadTexture( src );
@@ -165,8 +165,10 @@ WILLOWBRAE.Theater.prototype = {
       if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
         floorTexture.minFilter = THREE.LinearFilter
       }
-      floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-      floorTexture.repeat.set( 4, 4 );
+      if (args.repeat) {
+        floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+        floorTexture.repeat = args.repeat
+      }
 
     	var floorMaterial = new THREE.MeshBasicMaterial( { 
 		        side: THREE.DoubleSide /* both sides of this mesh are drawn */ 

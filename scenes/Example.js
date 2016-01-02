@@ -15,6 +15,7 @@ Example.init = function (t) {
     var floor = t.card(
           { src: 'images/checkerboard.jpg'
           , size: new THREE.Vector2(512,512)
+          , repeat: new THREE.Vector2(4,4)
           }
     )
     floor.rotation.x = Math.PI / 2; // Rotations happend before the position is moved
@@ -28,7 +29,6 @@ Example.init = function (t) {
     )
     back_wall.position.z -= 256
     t.add(back_wall);
-
 
     var left_wall = t.card(
           { src: 'images/green_wall.jpeg'
