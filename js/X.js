@@ -161,13 +161,36 @@ WILLOWBRAE.Theater.prototype = {
       var floorMaterial = this.surfaceCache[src];
     } else {
     	var floorTexture = new THREE.ImageUtils.loadTexture( src );
+      var floorSpec = args.spec && new THREE.ImageUtils.loadTexture( args.spec );
+
       // This is needed for non-POT images
       if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
         floorTexture.minFilter = THREE.LinearFilter
+        if (floorSpec) { floorSpec.minFilter = THREE.LinearFilter }
       }
       if (args.repeat) {
         floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
         floorTexture.repeat = args.repeat
+        if (floorSpec) { 
+          floorSpec.wrapS = floorSpec.wrapT = THREE.RepeatWrapping; 
+          floorSpec.repeat = args.repeat
+        }
+      }
+
+      if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
+        floorTexture.minFilter = THREE.LinearFilter
+        if (floorSpec) { 
+          floorSpec.minFilter = THREE.LinearFilter
+        }
+      }
+
+      if (args.repeat) {
+        floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+        floorTexture.repeat = args.repeat
+        if (floorSpec) { 
+          floorSpec.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+          floorSpec.repeat = args.repeat
+        }
       }
 
     	var floorMaterial = new THREE.MeshBasicMaterial( { 
@@ -177,6 +200,9 @@ WILLOWBRAE.Theater.prototype = {
       floorMaterial.transparent = true;
       floorMaterial.depthWrite = false // Artifacts also disappear when seting depthTest to false
       floorMaterial.map = floorTexture
+      if (floorSpec) { 
+        floorMaterial.specularMap = floorSpec
+      }
       floorMaterial.needsUpdate = true // This is needed
 	    this.surfaceCache[src] = floorMaterial;
     }

@@ -13,7 +13,8 @@ Example.init = function (t) {
     // FLOOR
 
     var floor = t.card(
-          { src: 'images/checkerboard.jpg'
+          { src: 'images/rustytiles01_diff.jpg'
+          , spec: 'images/rustytiles01_spec.jpg'
           , size: new THREE.Vector2(512,512)
           , repeat: new THREE.Vector2(4,4)
           }
