@@ -7,3 +7,5 @@ Windsor Gardens is intended as a homage to the TV program [Paddington Bear](http
 Textures
 
  * http://www.texturemate.com/
+ * http://opengameart.org/node/7793 
+  (Spiney on opengameart.org)
