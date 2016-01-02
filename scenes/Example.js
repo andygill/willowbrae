@@ -35,6 +35,7 @@ Example.init = function (t) {
           { src: 'images/green_wall.jpeg'
           , size: new THREE.Vector2(512,256)
           , anchor: new THREE.Vector2(512 / 2, 256)
+          , repeat: new THREE.Vector2(4,4)
           }
     )
     left_wall.rotation.y = Math.PI / 2; // Rotations happend before the position is moved
@@ -46,6 +47,7 @@ Example.init = function (t) {
         { src: 'images/PNG_transparency_demonstration_1.png'
         , size: new THREE.Vector2(512,256)
         , anchor: new THREE.Vector2(512 / 2,256)
+        , transparent: true
         }
     )
     right_wall.rotation.y = -Math.PI / 2; // Rotations happend before the position is moved

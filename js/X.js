@@ -170,7 +170,7 @@ WILLOWBRAE.Theater.prototype = {
           this.minFilter = THREE.LinearFilter
         }
         if (args.repeat) {
-          this.wrapS = this.wrapT = THREE.RepeatWrapping; 
+          this.wrapS = this.wrapT = THREE.MirroredRepeatWrapping; 
           this.repeat = args.repeat
         }
       }
@@ -179,13 +179,14 @@ WILLOWBRAE.Theater.prototype = {
       if (floorSpec) { update.call(floorSpec) }
 
     	var floorMaterial = new THREE.MeshBasicMaterial( { 
-		        side: THREE.SingleSide /* both sides of this mesh are drawn */ 
+		        side: THREE.FrontSide /* both sides of this mesh are drawn */ 
       });
     	var backMaterial = new THREE.MeshBasicMaterial( { 
 		        side: THREE.BackSide /* both sides of this mesh are drawn */ 
       });
+      if ( args.transparent ) { floorMaterial.transparent = args.transparent }
 
-      floorMaterial.transparent = true;
+//      floorMaterial.transparent = true;
 //      floorMaterial.depthWrite = false // Artifacts also disappear when seting depthTest to false
       floorMaterial.map = floorTexture
       if (floorSpec) { 
@@ -200,7 +201,7 @@ WILLOWBRAE.Theater.prototype = {
 
     // We always create an anchor, and fasten our surface to this anchor.
     var center = new THREE.Object3D();
-    var floorGeometry = new THREE.PlaneGeometry(size.x,size.y);
+    var floorGeometry = new THREE.PlaneGeometry(size.x,size.y,10,10);
     var floor = new THREE.Mesh(floorGeometry, floorMaterial);
     var floorGeometry = new THREE.PlaneGeometry(size.x,size.y,2,2);
     var back = new THREE.Mesh(floorGeometry, backMaterial);
