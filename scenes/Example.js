@@ -66,8 +66,11 @@ Example.init = function (t) {
           }
     )
     left_wall.rotation.y = Math.PI / 2; // Rotations happend before the position is moved
+    console.log("position",left_wall.position)
     left_wall.position.x = -256
-    t.add(left_wall);
+    debug.position = left_wall.position
+    t.add(left_wall)
+    t.debug(left_wall,"Left Wall")
 
     var right_wall = t.card(
         // From https://en.wikipedia.org/wiki/Portable_Network_Graphics
@@ -78,7 +81,7 @@ Example.init = function (t) {
         }
     )
     right_wall.rotation.y = -Math.PI / 2; // Rotations happend before the position is moved
-    right_wall.position.x = 256
+    right_wall.position = new THREE.Vector3(0,0,0)
     t.add(right_wall);
 
 

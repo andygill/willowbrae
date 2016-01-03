@@ -144,7 +144,29 @@ WILLOWBRAE.Theater.prototype = {
 
   add: function(e) {
     this.scene.add(e) 
-    this.children.push(e)
+    this.children.push(e) // we might be able to use the scenes' children node.
+  },
+
+  // For when you want a gui debugging widget for specific things
+  debug: function(e,nm) {
+
+    this.gui.folder(nm,function() {
+      this.folder('position',function() {
+        this.add(e.position, 'x').step(1)
+        this.add(e.position, 'y').step(1)
+        this.add(e.position, 'z').step(1)
+      })
+      return true;
+/*
+      this.add(that, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
+      this.add(controls.center,'y').min(0).max(256).step(1);
+      this.add(that.camera, 'fov').listen().onChange(function(value) {
+        camera.updateProjectionMatrix()
+      })
+      return true;
+*/
+    })    
+
   },
   
   children: [],
