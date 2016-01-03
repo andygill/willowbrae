@@ -1,6 +1,6 @@
 var Example = { };
 
-
+debug = {}
 
 Example.init = function (t) {
     var scene = t.scene
@@ -13,22 +13,29 @@ Example.init = function (t) {
     // FLOOR
 
     var floor = t.card(
-          { src: 'images/rustytiles01_diff.jpg'
-          , spec: 'images/rustytiles01_spec.jpg'
+      { src: 'images/rustytiles01_diff.jpg'
+          , specular: 'images/rustytiles01_spec.jpg'
           , size: new THREE.Vector2(512,512)
           , repeat: new THREE.Vector2(4,4)
           }
     )
+    floor.rotation.z = Math.PI / 2; // Rotations happend before the position is moved
     floor.rotation.x = -Math.PI / 2; // Rotations happend before the position is moved
     t.add(floor);
 
     var back_wall = t.card(
-          { src: 'images/checkerboard.jpg'
+          { material: THREE.MeshPhongMaterial
+          , color: new THREE.Color("#123456") //src: 'images/checkerboard.jpg'
           , size: new THREE.Vector2(512,256)
           , anchor: new THREE.Vector2(512 / 2, 256)
           }
     )
     back_wall.position.z -= 256
+//    back_wall.card.material.wireframe = true
+//    back_wall.card.material.color = "#ff0000"
+//    back_wall.card.material.vertexColors = THREE.FaceColors
+//    back_wall.card.material.needsUpdate = true // This is needed
+    debug.floor = back_wall
     t.add(back_wall);
 
     var left_wall = t.card(
@@ -57,6 +64,7 @@ Example.init = function (t) {
 
 
     t.gui.folder('walks',function() {
+      this.addColor(back_wall.card.material,'color')
       this.add(left_wall.position, 'x').min(-256).max(256).step(16)
       this.add(right_wall.position, 'x').min(-256).max(256).step(16)
       return true

@@ -154,54 +154,56 @@ WILLOWBRAE.Theater.prototype = {
   // Public function: adds a cardboard 'card' to the world
   card: function (args) {
       //    console.log(args,surfaceCache)
-    var src = args.src || "";
+  	var floorTexture = args.src      && new THREE.ImageUtils.loadTexture( args.src );
+    var floorSpec    = args.specular && new THREE.ImageUtils.loadTexture( args.specular );
+
     var size   = args.size   || new THREE.Vector2(128,128)
     var anchor = args.anchor || new THREE.Vector2(size.x * 0.5, size.y * 0.5)
-    if (this.surfaceCache[src] && false) {
-      var floorMaterial = this.surfaceCache[src];
-    } else {
-    	var floorTexture = new THREE.ImageUtils.loadTexture( src );
-      var floorSpec = args.specular && new THREE.ImageUtils.loadTexture( args.specular );
 
-      function update() {
+    function update() {
+      this.minFilter = THREE.LinearFilter
+      // This is needed for non-POT images
+      if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
         this.minFilter = THREE.LinearFilter
-        // This is needed for non-POT images
-        if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
-          this.minFilter = THREE.LinearFilter
-        }
-        if (args.repeat) {
-          this.wrapS = this.wrapT = THREE.MirroredRepeatWrapping; 
-          this.repeat = args.repeat
-        }
       }
+      if (args.repeat) {
+        this.wrapS = this.wrapT = THREE.RepeatWrapping // THREE.MirroredRepeatWrapping; 
+        this.repeat = args.repeat
+      }
+    }
 
-      update.call(floorTexture)
-      if (floorSpec) { update.call(floorSpec) }
+    if (floorTexture) { update.call(floorTexture) }
+    if (floorSpec) { update.call(floorSpec) }
 
-    	var floorMaterial = new THREE.MeshBasicMaterial( { 
-		        side: THREE.FrontSide /* both sides of this mesh are drawn */ 
-      });
-    	var backMaterial = new THREE.MeshBasicMaterial( { 
-		        side: THREE.BackSide /* both sides of this mesh are drawn */ 
-      });
-      if ( args.transparent ) { floorMaterial.transparent = args.transparent }
+    var constructor = args.material || THREE.MeshBasicMaterial
+  	var floorMaterial = new constructor( { 
+	        side: THREE.FrontSide /* both sides of this mesh are drawn */ 
+    });
+    console.log("floorMaterial",floorMaterial.color,args.color)
+    if ( args.color ) { floorMaterial.color = args.color }
+  	var backMaterial = new THREE.MeshPhongMaterial( {
+	        side: THREE.BackSide /* both sides of this mesh are drawn */ 
+        , color: "#000000"
+    });
+    if ( args.transparent ) { floorMaterial.transparent = args.transparent }
 
 //      floorMaterial.transparent = true;
 //      floorMaterial.depthWrite = false // Artifacts also disappear when seting depthTest to false
-      floorMaterial.map = floorTexture
-      if (floorSpec) { 
-        floorMaterial.specularMap = floorSpec
-      }
-      floorMaterial.needsUpdate = true // This is needed
-      backMaterial.wireframe = true
-      backMaterial.needsUpdate = true // This is needed
-
-//	    this.surfaceCache[src] = floorMaterial;
+    if (floorTexture) {
+      floorMaterial.map = floorTexture 
     }
+    if (floorSpec) { 
+      floorMaterial.specularMap = floorSpec
+    }
+    floorMaterial.needsUpdate = true // This is needed
+//    backMaterial.wireframe = true
+    backMaterial.opacity = 0.1
+    backMaterial.transparent = true
+    backMaterial.needsUpdate = true // This is needed
 
     // We always create an anchor, and fasten our surface to this anchor.
     var center = new THREE.Object3D();
-    var floorGeometry = new THREE.PlaneGeometry(size.x,size.y,10,10);
+    var floorGeometry = new THREE.PlaneGeometry(size.x,size.y);
     var floor = new THREE.Mesh(floorGeometry, floorMaterial);
     var floorGeometry = new THREE.PlaneGeometry(size.x,size.y,2,2);
     var back = new THREE.Mesh(floorGeometry, backMaterial);
@@ -210,7 +212,7 @@ WILLOWBRAE.Theater.prototype = {
 //    console.log((0.5 * size.x) - anchor.x ,- (0.5 * size.y) + anchor.y,0);
     floor.position.set((0.5 * size.x) - anchor.x ,-(0.5 * size.y) + anchor.y,0);
     center.add(floor);
-    back.position.set((0.5 * size.x) - anchor.x ,-(0.5 * size.y) + anchor.y,-1);
+    back.position.set((0.5 * size.x) - anchor.x ,-(0.5 * size.y) + anchor.y,-0.01); // 1 unit back
     center.add(back);
 
     var sphere = new THREE.SphereGeometry( 5, 4, 4 );
