@@ -156,16 +156,17 @@ WILLOWBRAE.Theater.prototype = {
       //    console.log(args,surfaceCache)
   	var floorTexture = args.src      && new THREE.ImageUtils.loadTexture( args.src );
     var floorSpec    = args.specular && new THREE.ImageUtils.loadTexture( args.specular );
+    var floorNorm    = args.normal   && new THREE.ImageUtils.loadTexture( args.normal );
 
     var size   = args.size   || new THREE.Vector2(128,128)
     var anchor = args.anchor || new THREE.Vector2(size.x * 0.5, size.y * 0.5)
 
     function update() {
-      this.minFilter = THREE.LinearFilter
+//      this.minFilter = THREE.LinearFilter
       // This is needed for non-POT images
-      if (!THREE.Math.isPowerOfTwo(size.x) || THREE.Math.isPowerOfTwo(size.y)) {
-        this.minFilter = THREE.LinearFilter
-      }
+//      if (!THREE.Math.isPowerOfTwo(size.x) || !THREE.Math.isPowerOfTwo(size.y)) {
+//        this.minFilter = THREE.LinearFilter
+//      }
       if (args.repeat) {
         this.wrapS = this.wrapT = THREE.RepeatWrapping // THREE.MirroredRepeatWrapping; 
         this.repeat = args.repeat
@@ -174,6 +175,7 @@ WILLOWBRAE.Theater.prototype = {
 
     if (floorTexture) { update.call(floorTexture) }
     if (floorSpec) { update.call(floorSpec) }
+    if (floorNorm) { update.call(floorNorm) }
 
     var constructor = args.material || THREE.MeshBasicMaterial
   	var floorMaterial = new constructor( { 
@@ -195,8 +197,12 @@ WILLOWBRAE.Theater.prototype = {
     if (floorSpec) { 
       floorMaterial.specularMap = floorSpec
     }
+    if (floorSpec) { 
+      floorMaterial.normalMap = floorNorm
+    }
     floorMaterial.needsUpdate = true // This is needed
 //    backMaterial.wireframe = true
+
     backMaterial.opacity = 0.1
     backMaterial.transparent = true
     backMaterial.needsUpdate = true // This is needed

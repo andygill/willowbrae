@@ -9,3 +9,5 @@ Textures
  * http://www.texturemate.com/
  * http://opengameart.org/node/7793 
   (Spiney on opengameart.org)
+
+ * Wood floor: http://opengameart.org/node/39094, public domain

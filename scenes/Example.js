@@ -12,14 +12,34 @@ Example.init = function (t) {
     scene.add(light);
     // FLOOR
 
+    t.gui.folder('light',function() {
+      this.add(light.position, 'x').min(-256).max(256).step(16)
+      this.add(light.position, 'y').min(-256).max(256).step(16)
+      this.add(light.position, 'z').min(-256).max(256).step(16)
+      return true
+    })
+
+
+/*
     var floor = t.card(
       { src: 'images/rustytiles01_diff.jpg'
-          , specular: 'images/rustytiles01_spec.jpg'
-          , size: new THREE.Vector2(512,512)
-          , repeat: new THREE.Vector2(4,4)
-          }
+      , specular: 'images/rustytiles01_spec.jpg'
+      , size: new THREE.Vector2(512,512)
+      , repeat: new THREE.Vector2(4,4)
+      }
     )
-    floor.rotation.z = Math.PI / 2; // Rotations happend before the position is moved
+*/
+    var floor = t.card(
+      { material: THREE.MeshPhongMaterial
+      , src:      'images/woodfloor_c.jpg'
+      , specular: 'images/woodfloor_s_z.png'
+      , normal:   'images/woodfloor_n.png'
+      , size: new THREE.Vector2(512,512)
+      }
+    )
+
+
+//    floor.rotation.z = Math.PI / 2; // Rotations happend before the position is moved
     floor.rotation.x = -Math.PI / 2; // Rotations happend before the position is moved
     t.add(floor);
 
@@ -32,9 +52,9 @@ Example.init = function (t) {
     )
     back_wall.position.z -= 256
 //    back_wall.card.material.wireframe = true
-//    back_wall.card.material.color = "#ff0000"
+//     back_wall.card.material.color = new THREE.Color("#ff0000")
 //    back_wall.card.material.vertexColors = THREE.FaceColors
-//    back_wall.card.material.needsUpdate = true // This is needed
+    back_wall.card.material.needsUpdate = true // This is needed
     debug.floor = back_wall
     t.add(back_wall);
 
