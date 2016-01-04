@@ -150,19 +150,61 @@ WILLOWBRAE.Theater.prototype = {
   // For when you want a gui debugging widget for specific things
   debug: function(e,nm) {
 
+    debug.e = e
+
     this.gui.folder(nm,function() {
       this.folder('position',function() {
         this.add(e.position, 'x').step(1).listen()
         this.add(e.position, 'y').step(1).listen()
         this.add(e.position, 'z').step(1).listen()
       })
-      var rotation = e.rotation.clone()
+      var ratio = 180 / Math.PI
+      var rotation = new THREE.Vector3(e.rotation.x * ratio,e.rotation.y * ratio,e.rotation.z * ratio)
+      rotation.reset = function() { this.x = this.y = this.z = e.rotation.x = e.rotation.y = e.rotation.z = 0 } 
+      debug.rotation = rotation
+      var updateRotation = function (lbl) {
+        return function(value) {
+          e.rotation[lbl] = value / ratio
+        }
+      };
+
       this.folder('rotation',function() {
-        this.add(rotation, 'x').step(Math.PI / 100).max(Math.PI/2).min(-Math.PI/2).listen()
-        this.add(rotation, 'y').step(Math.PI / 100).listen()
-        this.add(rotation, 'z').step(Math.PI / 100).listen()
+        this.add(rotation, 'x',-180,180).listen().onChange(updateRotation('x'))
+        this.add(rotation, 'y',-180,180).listen().onChange(updateRotation('y'))
+        this.add(rotation, 'z',-180,180).listen().onChange(updateRotation('z'))
+        this.add(rotation,'reset') // .onChange(function() { e.rotation = new THREE.Vector3(0,0,0) })
       })
-      return true;
+
+      var data = 
+        { color:    e.card.material.color.getHex()
+        , emissive: e.card.material.emissive.getHex()
+        , specular: e.card.material.specular.getHex()
+        }
+
+      // Adapted from Greg Tatum's material.js in the THREEjs documentation
+      var updateColor = function (o) {
+        return function(value) {
+          if (typeof value === "string") {
+              value = value.replace('#', '0x');
+          }
+          console.log("updateColor",value,o)
+          o.setHex( value );
+        }
+      };
+      this.folder('color',function() {
+        if (e.card.material.color) {
+            this.addColor(data,'color').onChange(updateColor(e.card.material.color))
+        }
+        if (e.card.material.emissive) {
+            this.addColor(data,'emissive').onChange(updateColor(e.card.material.emissive))
+        }
+        if (e.card.material.specular) {
+            this.addColor(data,'specular').onChange(updateColor(e.card.material.specular))
+        }
+        this.add(e.card.material,'shininess',0,100)
+
+      })
+     return true;
 /*
       this.add(that, 'fps', { Slow: 1, Slower: 10, "Full Speed": null } );
       this.add(controls.center,'y').min(0).max(256).step(1);
@@ -208,18 +250,15 @@ WILLOWBRAE.Theater.prototype = {
     var constructor = args.material || THREE.MeshBasicMaterial
   	var floorMaterial = new constructor( { 
 	        side: THREE.FrontSide /* both sides of this mesh are drawn */ 
-        , color: "#123457"
     });
     console.log("floorMaterial",floorMaterial.color,args.color)
-//    if ( args.color ) { floorMaterial.color = new THREE.Color("#123456") }
+    if ( args.color ) { floorMaterial.color = new THREE.Color(args.color) }
   	var backMaterial = new THREE.MeshPhongMaterial( {
 	        side: THREE.BackSide /* both sides of this mesh are drawn */ 
         , color: "#000000"
     });
     if ( args.transparent ) { floorMaterial.transparent = args.transparent }
 
-//      floorMaterial.transparent = true;
-//      floorMaterial.depthWrite = false // Artifacts also disappear when seting depthTest to false
     if (floorTexture) {
       floorMaterial.map = floorTexture 
     }
@@ -230,7 +269,6 @@ WILLOWBRAE.Theater.prototype = {
       floorMaterial.normalMap = floorNorm
     }
     floorMaterial.needsUpdate = true // This is needed
-//    backMaterial.wireframe = true
 
     backMaterial.opacity = 0.1
     backMaterial.transparent = true

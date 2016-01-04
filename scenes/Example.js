@@ -51,12 +51,10 @@ Example.init = function (t) {
           }
     )
     back_wall.position.z -= 256
-//    back_wall.card.material.wireframe = true
-//     back_wall.card.material.color = new THREE.Color("#ff0000")
-//    back_wall.card.material.vertexColors = THREE.FaceColors
     back_wall.card.material.needsUpdate = true // This is needed
     debug.floor = back_wall
     t.add(back_wall);
+    t.debug(back_wall,"Back Wall")
 
     var left_wall = t.card(
           { src: 'images/green_wall.jpeg'
@@ -70,7 +68,6 @@ Example.init = function (t) {
     left_wall.position.x = -256
     debug.position = left_wall.position
     t.add(left_wall)
-    t.debug(left_wall,"Left Wall")
 
     var right_wall = t.card(
         // From https://en.wikipedia.org/wiki/Portable_Network_Graphics
