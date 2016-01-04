@@ -45,7 +45,7 @@ Example.init = function (t) {
 
     var back_wall = t.card(
           { material: THREE.MeshPhongMaterial
-          , color: new THREE.Color("#123456") //src: 'images/checkerboard.jpg'
+          , color: 0x123456 //src: 'images/checkerboard.jpg'
           , size: new THREE.Vector2(512,256)
           , anchor: new THREE.Vector2(512 / 2, 256)
           }
@@ -85,9 +85,17 @@ Example.init = function (t) {
     t.add(right_wall);
 
 
+    var data = { color: back_wall.card.material.color.getHex() }
 
     t.gui.folder('walks',function() {
-      this.addColor(back_wall.card.material,'color')
+//      this.addColor(back_wall.card.material,'color').
+      this.addColor(data,'color').onChange(function(value) {
+        // From Greg Tatum's material.js in the THREEjs documentation
+        if (typeof value === "string") {
+              value = value.replace('#', '0x');
+        }
+        back_wall.card.material.color.setHex( value );
+      })
       this.add(left_wall.position, 'x').min(-256).max(256).step(16)
       this.add(right_wall.position, 'x').min(-256).max(256).step(16)
       return true

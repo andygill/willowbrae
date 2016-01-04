@@ -152,9 +152,15 @@ WILLOWBRAE.Theater.prototype = {
 
     this.gui.folder(nm,function() {
       this.folder('position',function() {
-        this.add(e.position, 'x').step(1)
-        this.add(e.position, 'y').step(1)
-        this.add(e.position, 'z').step(1)
+        this.add(e.position, 'x').step(1).listen()
+        this.add(e.position, 'y').step(1).listen()
+        this.add(e.position, 'z').step(1).listen()
+      })
+      var rotation = e.rotation.clone()
+      this.folder('rotation',function() {
+        this.add(rotation, 'x').step(Math.PI / 100).max(Math.PI/2).min(-Math.PI/2).listen()
+        this.add(rotation, 'y').step(Math.PI / 100).listen()
+        this.add(rotation, 'z').step(Math.PI / 100).listen()
       })
       return true;
 /*
@@ -202,9 +208,10 @@ WILLOWBRAE.Theater.prototype = {
     var constructor = args.material || THREE.MeshBasicMaterial
   	var floorMaterial = new constructor( { 
 	        side: THREE.FrontSide /* both sides of this mesh are drawn */ 
+        , color: "#123457"
     });
     console.log("floorMaterial",floorMaterial.color,args.color)
-    if ( args.color ) { floorMaterial.color = args.color }
+//    if ( args.color ) { floorMaterial.color = new THREE.Color("#123456") }
   	var backMaterial = new THREE.MeshPhongMaterial( {
 	        side: THREE.BackSide /* both sides of this mesh are drawn */ 
         , color: "#000000"
