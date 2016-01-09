@@ -1,2 +1,6 @@
 *~
 archive/
+.cabal-sandbox/
+dist/
+cabal.sandbox.config
+
