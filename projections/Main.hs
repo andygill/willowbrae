@@ -9,14 +9,16 @@ import Data.Text (pack, Text)
 import Types
 
 main = blankCanvas 3000 $ \ context -> do
-  let (w,h) = (2508,1254) :: (Double,Double)
+  let (w,h) = (2508,1254) :: (Int,Int)
 {-
   let p :: Geographic -> (Double,Double)
       p (x,y) = (((x' + 1) / 2) * w, ((-y' + 1) / 2) * h)
          where (x',y') = project (x,y)
 -}
-  testCard context "test-sphere-360.png" (w,h) ThreeSixty projectSphere
+  let state = State ThreeSixty context (w,h) projectSphere
+  send context (testCard state) >>= writeDataURL "test-sphere-360.png" 
 --  testCard context "test-dome-180.png"   (w,h) OneEighty  projectDome
+  print "Done"
   
 data Space = ThreeSixty | OneEighty
 {-
@@ -44,14 +46,19 @@ data State = State
   , screenProjection :: Geographic -> (ScreenX,ScreenY)
   }
 
-testCard :: DeviceContext -> String -> (Double,Double) -> Space -> (Geographic -> (X,Y)) -> IO ()
-testCard context fileName (w,h) space project = do
+testCard :: State -> Canvas Text
+testCard state = do
+  let context = theDevice state
+  let (w,h) = case theSize state of
+                 (w',h') -> (fromIntegral w', fromIntegral h')
+  let space = theSpace state
+  let project = screenProjection state
 
   let p :: Geographic -> (Double,Double)
       p (Geographic (x,y)) = (((x' + 1) / 2) * w, ((-y' + 1) / 2) * h)
          where (x',y') = project (Geographic (x,y))
 
-  txt <- send context $ do
+  id $ do
     top <- myCanvasContext
     c <- newCanvas (round w,round h)
     return ()
@@ -128,9 +135,6 @@ testCard context fileName (w,h) space project = do
         drawImage (c,[0,0,width context,height context])
 
       toDataURL() -- of tempCanvas
-  writeDataURL fileName txt
-  print $  "Written " ++ fileName
-  
   
 
 
