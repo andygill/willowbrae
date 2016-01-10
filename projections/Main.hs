@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 -- Code to generate projection models
 
 import Graphics.Blank
@@ -5,20 +6,64 @@ import qualified Graphics.Blank.Style as Style
 import Debug.Trace
 import Control.Monad (when)
 import Data.Text (pack, Text)
+import Types
 
 main = blankCanvas 3000 $ \ context -> do
   let (w,h) = (2508,1254) :: (Double,Double)
+{-
   let p :: Geographic -> (Double,Double)
-      p (x,y) = {- traceShow (x,y,x',y')-} (((x' + 1) / 2) * w, ((-y' + 1) / 2) * h)
+      p (x,y) = (((x' + 1) / 2) * w, ((-y' + 1) / 2) * h)
          where (x',y') = project (x,y)
+-}
+  testCard context "test-sphere-360.png" (w,h) ThreeSixty projectSphere
+--  testCard context "test-dome-180.png"   (w,h) OneEighty  projectDome
   
+data Space = ThreeSixty | OneEighty
+{-
+type Longitude = Double -- -180 .. 180
+type Latitude  = Double --  -90 .. 90
+type Geographic = (Longitude,Latitude)
+type ScreenX = Double         -- -1 .. 1, + on right
+type ScreenY = Double         -- -1 .. 1, + on top
+
+type Distance    = Double     -- nominally meters
+type Inclination = Double     -- 
+type Azimuth     = Double
+
+type Spherical = (Distance,Inclination,Azimuth)
+type Cartesian = (Double,Double,Double)
+-}
+
+type X = Double         -- -1 .. 1, + on right
+type Y = Double         -- -1 .. 1, + on top
+
+data State = State
+  { theSpace  :: Space
+  , theDevice :: DeviceContext
+  , theSize   :: (Int,Int)
+  , screenProjection :: Geographic -> (ScreenX,ScreenY)
+  }
+
+testCard :: DeviceContext -> String -> (Double,Double) -> Space -> (Geographic -> (X,Y)) -> IO ()
+testCard context fileName (w,h) space project = do
+
+  let p :: Geographic -> (Double,Double)
+      p (Geographic (x,y)) = (((x' + 1) / 2) * w, ((-y' + 1) / 2) * h)
+         where (x',y') = project (Geographic (x,y))
+
   txt <- send context $ do
     top <- myCanvasContext
     c <- newCanvas (round w,round h)
     return ()
     with c $ do
-      let longs = fmap (*30) [-6..6] :: [Int]
-      let lats  = fmap (*30) [-3..3] :: [Int]
+      lineWidth 2
+
+      let longs :: [Longitude]
+                = fmap fromIntegral $ case space of
+                    ThreeSixty -> fmap (*30) [-6..6] :: [Int]
+                    OneEighty  -> fmap (*30) [-3..3] :: [Int]
+      let lats :: [Latitude]
+            = fmap fromIntegral (fmap (*30) [-3..3] :: [Int])
       grd <- createLinearGradient(0, 0, 0, h)
         -- light blue
       grd # addColorStop(0, "#8ED6FF")
@@ -27,7 +72,7 @@ main = blankCanvas 3000 $ \ context -> do
       Style.fillStyle grd;
       fillRect(0,0,w,h)
 
-
+{-
       sequence_
          [ do beginPath()
               strokeStyle "red"
@@ -51,20 +96,20 @@ main = blankCanvas 3000 $ \ context -> do
          | long <- longs
          , (lat1,lat2) <- lats `zip` tail lats
          ]
-
+-}
       sequence_
-          [ do  let (x,y) = p (fromIntegral long,fromIntegral lat)
+          [ do  let (x,y) = p $ Geographic (long,lat)
 --                () <- traceShow (long,lat,x,y) $ return ()
                 beginPath()
                 arc(x,y, 10, 0, 2 * pi, False)
                 fillStyle "black"
                 fill()
                 font "16pt Calibri"
-                fillText(pack (show long ++ "," ++ show lat) :: Text, x + 10, y + 20)
+                fillText(pack (show (round long) ++ "," ++ show (round lat)) :: Text, x + 10, y + 20)
           | long <- longs
           , lat  <- lats
           ]
-
+{-
       -- now draw a cube 
       
 
@@ -72,27 +117,19 @@ main = blankCanvas 3000 $ \ context -> do
         beginPath()
         strokeStyle "black"
         lineWidth 5
-        let line (x,y,z) (x',y',z') = 
-              interpolate 50 (x,y,z) (x',y',z')  $ \ (x,y,z) (x',y',z') -> do
-                  let (x1,y1) = three2Geographic (x,y,z)
-                      (x2,y2) = three2Geographic (x',y',z')
-                  () <- traceShow ((x1,y1),(x2,y2)) $ return ()
-                  when (distance (p (x1,y1)) (p (x2,y2)) < 100) $ do
-                    moveTo (p (x1,y1))
-                    lineTo (p (x2,y2))
-        let (x,y,z) = (1,1,1)
-        line (x,y,z) (-x,y,z)     
-        line (x,y,z) (x,-y,z)     
-        line (x,y,z) (x,y,-z)     
+        cubeAt (w,h) space p (0,0,0) 400 
+        lineWidth 1
+        cubeAt (w,h) space p (-40,-40,-200) 25
+        cubeAt (w,h) space p (0,-40,-200) 25
+        cubeAt (w,h) space p (40,-40,-200) 25
         stroke()
-
-
+-}
       with top $ do
         drawImage (c,[0,0,width context,height context])
 
       toDataURL() -- of tempCanvas
-  writeDataURL ("img.png") txt
-  print "Done"
+  writeDataURL fileName txt
+  print $  "Written " ++ fileName
   
   
 
@@ -108,14 +145,19 @@ main = blankCanvas 3000 $ \ context -> do
   -- x :: -1 .. 1
   -- y :: -1 .. 1
 
-type Longitude = Double -- -180 .. 180
+{-
+  type Longitude = Double -- -180 .. 180
 type Latitude  = Double --  -90 .. 90
 type Geographic = (Longitude,Latitude)
 type X = Double         -- -1 .. 1, + on right
 type Y = Double         -- -1 .. 1, + on top
+-}
 
-project :: Geographic -> (X,Y)
-project (x,y) = (x / 180,y / 90)
+projectSphere :: Geographic -> (X,Y)
+projectSphere (Geographic (x,y)) = (x / 180,y / 90)
+
+projectDome :: Geographic -> (X,Y)
+projectDome (Geographic (x,y)) = (x / 90,y / 90)
           
 -- Plane
 -- Sphere   -- 
@@ -141,7 +183,7 @@ project (x,y) = (x / 180,y / 90)
 
 -- Not defined at (0,0,0)
 
-
+{-
 three2Geographic :: (Double,Double,Double) -> Geographic
 three2Geographic (0,0,0) = (0,0)  -- choice
 three2Geographic (x,y,z) = (radian2degree t,radian2degree u)
@@ -149,9 +191,7 @@ three2Geographic (x,y,z) = (radian2degree t,radian2degree u)
       r = sqrt (x^2 + z^2)
       t = atan2 x (-z)
       u = atan (y / r)
-      
-radian2degree :: Double -> Double
-radian2degree = (* (180 / pi))
+-}
 
 class Lerp a where
   lerp2 :: a -> a -> Double -> a
@@ -179,3 +219,36 @@ distance (x,y) (x',y') = sqrt (xd * xd + yd * yd)
    where
      xd = x - x'
      yd = y - y'
+     
+{-
+cubeAt :: (Double,Double) -> Space -> (Geographic -> (Double,Double)) -> (Double,Double,Double) -> Double -> Canvas ()
+cubeAt (w,h) space  p (xO,yO,zO) sz = do
+    let guard z m = case space of
+             ThreeSixty -> m
+             OneEighty  -> if z <= 0 then m else return ()
+      
+    let fingers (x,y,z) = do
+          let wrap (x,y) = (if x < w/2 then x + w else x - w,y)
+          let line (x,y,z) (x',y',z') = 
+                interpolate 25 (x+xO,y+yO,z+zO) (x'+xO,y'+yO,z'+zO) $ \ (x,y,z) (x',y',z') -> guard z $ guard z' $ do
+                    let (x1,y1) = three2Geographic (x,y,z)
+                        (x2,y2) = three2Geographic (x',y',z')
+                    if (distance (p (x1,y1)) (p (x2,y2)) < w / 2)
+                    then do moveTo (p (x1,y1))
+                            lineTo (p (x2,y2))
+                    else do () <- traceShow (p(x1,y1),p(x2,y2)) $ return ()
+                            moveTo (p (x1,y1))
+                            lineTo (wrap (p (x2,y2)))
+                            moveTo (p (x2,y2))
+                            lineTo (wrap (p (x1,y2)))
+          line (x,y,z) (-x,y,z)     
+          line (x,y,z) (x,-y,z)     
+          line (x,y,z) (x,y,-z)     
+
+    let edge = sz / 2      
+    fingers (edge,edge,edge)          
+    fingers (-edge,-edge,edge)          
+    fingers (edge,-edge,-edge)          
+    fingers (-edge,edge,-edge)          
+    stroke()
+     -}
