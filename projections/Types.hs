@@ -19,6 +19,10 @@ type Azimuth     = Double     -- "longiture", In Radians, 0 is ahead, + is right
 newtype Spherical = Spherical (Distance,Inclination,Azimuth)
   deriving Show
 
+-- x == in/out, in+
+-- y == left/right, right+
+-- z == up/down, up+
+
 newtype Cartesian = Cartesian (Double,Double,Double)         -- in nominal meters
   deriving Show
 
@@ -46,7 +50,7 @@ cartesian2Spherical (Cartesian (0,0,0)) = Spherical (0,0,0)  -- choice
 cartesian2Spherical (Cartesian (x,y,z)) = mkSpherical (r,t,u)
   where
       r = sqrt (x^2 + y^2 + z^2)
-      t = asin (z / r)            -- polar angle, "latitude", 0 .. pi
+      t = asin (z / r)            -- polar angle, "latitude", 0 .. pi/2
       u = atan2 y x               -- azimuth angle, "longiture", -pi .. pi
 
 mkSpherical :: (Double,Double,Double) -> Spherical 
