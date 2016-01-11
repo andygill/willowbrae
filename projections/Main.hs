@@ -47,13 +47,12 @@ testCard3D state = do
   let (w,h) = theSize state 
   c <- newCanvas (round w,round h * 2)
   let state2 = state
-  img1 <- testCard state
-  img2 <- testCard state
+  img1 <- testCard $ state { screenProjection = screenProjection state . adjust (-0.033) }
+  img2 <- testCard $ state { screenProjection = screenProjection state . adjust ( 0.033) }
   with c $ do
      drawImage (img1,[0,0,w,h])
-     drawImage (img1,[0,h,w,h])
+     drawImage (img2,[0,h,w,h])
   return c
-
 
 testCard :: State -> Canvas CanvasContext
 testCard state = do
@@ -274,3 +273,8 @@ wrapDot state (x,y) sz = do
 --  arc(x+w,y, sz, 0, 2 * pi, False)
   arc(x+0,y, sz, 0, 2 * pi, False)
 --  arc(x-w,y, sz, 0, 2 * pi, False)  
+
+
+adjust :: forall coord . Coordinate coord => Double -> coord -> Cartesian
+adjust d coord = Cartesian (x,y - d,z)
+  where Cartesian (x,y,z) = toCartesian coord
