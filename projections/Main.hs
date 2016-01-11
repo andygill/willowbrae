@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables, RankNTypes #-}
 -- Code to generate projection models
 
 import Graphics.Blank
@@ -8,33 +8,29 @@ import Control.Monad (when)
 import Data.Text (pack, Text)
 import Types
 
+test :: Coordinate coord => coord -> (X,Y)
+test = {- toCanvas .-} projectSphere . toSpherical
+ where
+  (w,h) = (2508,1254)   
+  toCanvas (x',y') = (((x' + 1) / 2) * fromIntegral w, ((-y' + 1) / 2) * fromIntegral h)
+
 main = blankCanvas 3000 $ \ context -> do
-  let (w,h) = (2508,1254) :: (Int,Int)
-{-
-  let p :: Geographic -> (Double,Double)
-      p (x,y) = (((x' + 1) / 2) * w, ((-y' + 1) / 2) * h)
-         where (x',y') = project (x,y)
--}
-  let state = State ThreeSixty context (w,h) projectSphere
-  send context (testCard state) >>= writeDataURL "test-sphere-360.png" 
+
+  let (w,h) = (2508,1254)   
+  let toCanvas (x',y') = traceShow ("toCanvas",x',y') $ (((x' + 1) / 2) * w, ((-y' + 1) / 2) * h)
+  let state = State ThreeSixty context (w,h)
+                  (toCanvas . projectSphere . toSpherical)
+
+  txt <- send context $ do
+      img <- testCard state
+      drawImage (img,[0,0,width context,height context])
+      toDataURL()
+  writeDataURL "test-sphere-360.png" txt
+
 --  testCard context "test-dome-180.png"   (w,h) OneEighty  projectDome
   print "Done"
   
 data Space = ThreeSixty | OneEighty
-{-
-type Longitude = Double -- -180 .. 180
-type Latitude  = Double --  -90 .. 90
-type Geographic = (Longitude,Latitude)
-type ScreenX = Double         -- -1 .. 1, + on right
-type ScreenY = Double         -- -1 .. 1, + on top
-
-type Distance    = Double     -- nominally meters
-type Inclination = Double     -- 
-type Azimuth     = Double
-
-type Spherical = (Distance,Inclination,Azimuth)
-type Cartesian = (Double,Double,Double)
--}
 
 type X = Double         -- -1 .. 1, + on right
 type Y = Double         -- -1 .. 1, + on top
@@ -42,21 +38,17 @@ type Y = Double         -- -1 .. 1, + on top
 data State = State
   { theSpace  :: Space
   , theDevice :: DeviceContext
-  , theSize   :: (Int,Int)
-  , screenProjection :: Geographic -> (ScreenX,ScreenY)
+  , theSize   :: (Double,Double)
+  , screenProjection :: forall coord . Coordinate coord => coord -> (ScreenX,ScreenY)
   }
 
-testCard :: State -> Canvas Text
+testCard :: State -> Canvas CanvasContext
 testCard state = do
   let context = theDevice state
-  let (w,h) = case theSize state of
-                 (w',h') -> (fromIntegral w', fromIntegral h')
+  let (w,h) = theSize state 
   let space = theSpace state
-  let project = screenProjection state
-
-  let p :: Geographic -> (Double,Double)
-      p (Geographic (x,y)) = (((x' + 1) / 2) * w, ((-y' + 1) / 2) * h)
-         where (x',y') = project (Geographic (x,y))
+  let p :: Coordinate coord => coord -> (X,Y)
+      p = screenProjection state  -- from the coord system, to the canvas location
 
   id $ do
     top <- myCanvasContext
@@ -73,68 +65,88 @@ testCard state = do
             = fmap fromIntegral (fmap (*30) [-3..3] :: [Int])
       grd <- createLinearGradient(0, 0, 0, h)
         -- light blue
+
       grd # addColorStop(0, "#8ED6FF")
       -- dark blue
       grd # addColorStop(1, "#004CB3")
       Style.fillStyle grd;
       fillRect(0,0,w,h)
 
-{-
       sequence_
          [ do beginPath()
               strokeStyle "red"
-              interpolate 10 (fromIntegral long1,fromIntegral lat) 
-                             (fromIntegral long2,fromIntegral lat) $ \ (x1,y1) (x2,y2) -> do
-                moveTo (p (x1,y1))
-                lineTo (p (x2,y2))
+              lineWidth 2
+              interpolate 10 (Geographic (long1,lat)) 
+                             (Geographic (long2,lat)) $ \ p1 p2 -> do
+                wrapLine state (p p1) (p p2)
               stroke()
          | (long1,long2) <- longs `zip` tail longs
          , lat  <- lats
          ]
-
       sequence_
          [ do beginPath()
               strokeStyle "green"
-              interpolate 10 (fromIntegral long,fromIntegral lat1) 
-                             (fromIntegral long,fromIntegral lat2) $ \ (x1,y1) (x2,y2) -> do
-                moveTo (p (x1,y1))
-                lineTo (p (x2,y2))
+              lineWidth 2
+              interpolate 10 (Geographic (long,lat1))
+                             (Geographic (long,lat2)) $ \ p1 p2 -> do
+                wrapLine state (p p1) (p p2)
               stroke()
          | long <- longs
          , (lat1,lat2) <- lats `zip` tail lats
          ]
--}
+{-
       sequence_
           [ do  let (x,y) = p $ Geographic (long,lat)
 --                () <- traceShow (long,lat,x,y) $ return ()
                 beginPath()
-                arc(x,y, 10, 0, 2 * pi, False)
+                wrapDot state (x,y) 10
                 fillStyle "black"
                 fill()
                 font "16pt Calibri"
-                fillText(pack (show (round long) ++ "," ++ show (round lat)) :: Text, x + 10, y + 20)
+                when (long /= last longs) $ do
+                  fillText(pack (show (round long) ++ "," ++ show (round lat)) :: Text, x + 10, y + 20)
           | long <- longs
           , lat  <- lats
           ]
-{-
+-}
       -- now draw a cube 
-      
+
+      saveRestore $ sequence_ [ do      
+            beginPath()
+            wrapDot state (p $ c) 10
+            let (x,y) = p $ c
+            () <- traceShow (c,x,y) $ return ()
+            fillStyle "black"
+            fill()
+            strokeStyle "black"
+            font "16pt Calibri"
+            fillText(pack (show c) :: Text, x - 10, y - 20)
+{-
+        | c <- [Cartesian (a,b,c)
+               | a <- [-1,0,1]
+               , b <- [-1,0,1]
+               , c <- [-1,0,1]
+               ] 
+
+-}
+        | c <- [Cartesian(0,0,0),Cartesian(1,0,1),Cartesian(1,1,1)]
+        ]
 
       saveRestore $ do      
         beginPath()
         strokeStyle "black"
         lineWidth 5
-        cubeAt (w,h) space p (0,0,0) 400 
+        cubeAt state (0,0,0) 4
+
+{-
         lineWidth 1
-        cubeAt (w,h) space p (-40,-40,-200) 25
-        cubeAt (w,h) space p (0,-40,-200) 25
-        cubeAt (w,h) space p (40,-40,-200) 25
+        cubeAt state(-40,-40,-200) 25
+        cubeAt state (0,-40,-200) 25
+        cubeAt state (40,-40,-200) 25
         stroke()
 -}
-      with top $ do
-        drawImage (c,[0,0,width context,height context])
-
-      toDataURL() -- of tempCanvas
+      
+      return c
   
 
 
@@ -157,12 +169,13 @@ type X = Double         -- -1 .. 1, + on right
 type Y = Double         -- -1 .. 1, + on top
 -}
 
-projectSphere :: Geographic -> (X,Y)
-projectSphere (Geographic (x,y)) = (x / 180,y / 90)
+projectSphere :: Spherical -> (X,Y)
+projectSphere (Spherical (_,t,u)) = (radian2degree (radian u) / 180,radian2degree (radian t) / 90)
 
 projectDome :: Geographic -> (X,Y)
 projectDome (Geographic (x,y)) = (x / 90,y / 90)
-          
+
+
 -- Plane
 -- Sphere   -- 
 -- Dome     -- 1/2 Sphere, looks okay
@@ -197,62 +210,60 @@ three2Geographic (x,y,z) = (radian2degree t,radian2degree u)
       u = atan (y / r)
 -}
 
-class Lerp a where
-  lerp2 :: a -> a -> Double -> a
-
-instance Lerp Double where
-  lerp2 a b s = b * s + a * (1 - s)
-
-instance (Lerp a, Lerp b) => Lerp (a,b) where
-  lerp2 (a1,a2) (b1,b2) s = (lerp2 a1 b1 s,lerp2 a2 b2 s)
-  
-instance (Lerp a, Lerp b, Lerp c) => Lerp (a,b,c) where
-  lerp2 (a1,a2,a3) (b1,b2,b3) s = (lerp2 a1 b1 s,lerp2 a2 b2 s,lerp2 a3 b3 s)  
-
-interpolate :: (Monad m, Lerp a) => Int -> a -> a -> (a -> a -> m ()) -> m ()
-interpolate n a b f = sequence_ [ f j j' | (j,j') <- js `zip` tail js ]
-  where js = joints n a b
-  
-joints :: Lerp a => Int -> a -> a -> [a]
-joints n a b = [ lerp2 a b (fromIntegral s/fromIntegral n) | s <- [0..n]]
-
-
--- wrap around if line is too long
-distance :: (X,Y) -> (X,Y) -> Double
-distance (x,y) (x',y') = sqrt (xd * xd + yd * yd)
-   where
-     xd = x - x'
-     yd = y - y'
      
-{-
-cubeAt :: (Double,Double) -> Space -> (Geographic -> (Double,Double)) -> (Double,Double,Double) -> Double -> Canvas ()
-cubeAt (w,h) space  p (xO,yO,zO) sz = do
-    let guard z m = case space of
-             ThreeSixty -> m
-             OneEighty  -> if z <= 0 then m else return ()
-      
-    let fingers (x,y,z) = do
-          let wrap (x,y) = (if x < w/2 then x + w else x - w,y)
-          let line (x,y,z) (x',y',z') = 
-                interpolate 25 (x+xO,y+yO,z+zO) (x'+xO,y'+yO,z'+zO) $ \ (x,y,z) (x',y',z') -> guard z $ guard z' $ do
-                    let (x1,y1) = three2Geographic (x,y,z)
-                        (x2,y2) = three2Geographic (x',y',z')
-                    if (distance (p (x1,y1)) (p (x2,y2)) < w / 2)
-                    then do moveTo (p (x1,y1))
-                            lineTo (p (x2,y2))
-                    else do () <- traceShow (p(x1,y1),p(x2,y2)) $ return ()
-                            moveTo (p (x1,y1))
-                            lineTo (wrap (p (x2,y2)))
-                            moveTo (p (x2,y2))
-                            lineTo (wrap (p (x1,y2)))
-          line (x,y,z) (-x,y,z)     
-          line (x,y,z) (x,-y,z)     
-          line (x,y,z) (x,y,-z)     
+cubeAt :: State -> (Double,Double,Double) -> Double -> Canvas ()
+cubeAt state (xO,yO,zO) sz = do
+  let (w,h) = theSize state 
+  let space = theSpace state
 
-    let edge = sz / 2      
-    fingers (edge,edge,edge)          
-    fingers (-edge,-edge,edge)          
-    fingers (edge,-edge,-edge)          
-    fingers (-edge,edge,-edge)          
-    stroke()
-     -}
+  let p = screenProjection state  -- from the coord system, to the canvas location
+
+  let guard z m = case space of
+           ThreeSixty -> m
+           OneEighty  -> if z <= 0 then m else return ()
+    
+  let fingers (x,y,z) = do
+--        () <- traceShow ("fingers",x,y,z) $ return ()
+        let wrap (x,y) = (if x < w/2 then x + w else x - w,y)
+        let line (x,y,z) (x',y',z') = 
+              interpolate 20 (x+xO,y+yO,z+zO) (x'+xO,y'+yO,z'+zO) $ \ (x,y,z) (x',y',z') -> guard z $ guard z' $ do
+                  let p1 = p $ Cartesian (x,y,z)
+                      p2 = p $ Cartesian (x',y',z')
+--                  () <- traceShow ("interp",p1,p2) $ return ()
+                  if (distance p1 p2 < w / 2)
+                  then do moveTo p1
+                          lineTo p2
+                  else do moveTo p1
+                          lineTo (wrap p2)
+                          moveTo p2
+                          lineTo (wrap p1)
+        line (x,y,z) (-x,y,z)     
+        line (x,y,z) (x,-y,z)     
+        line (x,y,z) (x,y,-z)     
+
+  let edge = sz / 2      
+  fingers (edge,edge,edge)          
+  fingers (-edge,-edge,edge)          
+  fingers (edge,-edge,-edge)          
+  fingers (-edge,edge,-edge)          
+  stroke()
+
+-- a line that crosses the edge of the screen
+wrapLine :: State -> (X,Y) -> (X,Y) -> Canvas ()
+wrapLine state p1 p2 = do
+  let (w,h) = theSize state
+  let wrap (x,y) = (if x < w/2 then x + w else x - w,y)
+  if (distance p1 p2 < w / 2)
+  then do moveTo p1
+          lineTo p2
+  else do moveTo p1
+          lineTo (wrap p2)
+          moveTo p2
+          lineTo (wrap p1)
+
+wrapDot :: State -> (X,Y) -> Double -> Canvas ()
+wrapDot state (x,y) sz = do
+  let (w,h) = theSize state
+--  arc(x+w,y, sz, 0, 2 * pi, False)
+  arc(x+0,y, sz, 0, 2 * pi, False)
+--  arc(x-w,y, sz, 0, 2 * pi, False)  
