@@ -22,7 +22,7 @@ main = blankCanvas 3000 $ \ context -> do
                   (toCanvas . projectSphere . toSpherical)
 
   txt <- send context $ do
-      img <- testCard state
+      img <- testCard3D state
       drawImage (img,[0,0,width context,height context])
       with img $ toDataURL()
   writeDataURL "test-sphere-360.png" txt
@@ -41,6 +41,19 @@ data State = State
   , theSize   :: (Double,Double)
   , screenProjection :: forall coord . Coordinate coord => coord -> (ScreenX,ScreenY)
   }
+
+testCard3D :: State -> Canvas CanvasContext
+testCard3D state = do
+  let (w,h) = theSize state 
+  c <- newCanvas (round w,round h * 2)
+  let state2 = state
+  img1 <- testCard state
+  img2 <- testCard state
+  with c $ do
+     drawImage (img1,[0,0,w,h])
+     drawImage (img1,[0,h,w,h])
+  return c
+
 
 testCard :: State -> Canvas CanvasContext
 testCard state = do
