@@ -24,7 +24,7 @@ main = blankCanvas 3000 $ \ context -> do
   txt <- send context $ do
       img <- testCard state
       drawImage (img,[0,0,width context,height context])
-      toDataURL()
+      with img $ toDataURL()
   writeDataURL "test-sphere-360.png" txt
 
 --  testCard context "test-dome-180.png"   (w,h) OneEighty  projectDome
@@ -110,7 +110,7 @@ testCard state = do
           ]
 -}
       -- now draw a cube 
-
+{-
       saveRestore $ sequence_ [ do      
             beginPath()
             wrapDot state (p $ c) 10
@@ -121,31 +121,25 @@ testCard state = do
             strokeStyle "black"
             font "16pt Calibri"
             fillText(pack (show c) :: Text, x - 10, y - 20)
-{-
         | c <- [Cartesian (a,b,c)
                | a <- [-1,0,1]
                , b <- [-1,0,1]
                , c <- [-1,0,1]
                ] 
 
--}
-        | c <- [Cartesian(0,0,0),Cartesian(1,0,1),Cartesian(1,1,1)]
+--        | c <- [Cartesian(0,0,0),Cartesian(1,0,1),Cartesian(1,1,1)]
         ]
-
+-}
       saveRestore $ do      
         beginPath()
         strokeStyle "black"
         lineWidth 5
         cubeAt state (0,0,0) 4
-
-{-
         lineWidth 1
-        cubeAt state(-40,-40,-200) 25
-        cubeAt state (0,-40,-200) 25
-        cubeAt state (40,-40,-200) 25
-        stroke()
--}
-      
+--        cubeAt state (-0.40,-0.40,-2) 0.25
+        sequence [ cubeAt state (2, 0.4 * i, -0.40) 0.25
+                 | i <- [-1,0,1]
+                 ]
       return c
   
 
