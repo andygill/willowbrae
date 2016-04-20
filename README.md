@@ -1,4 +1,6 @@
-# Willowbrae
+This repo is a prototype. It was replaced by ku-fpg/willowbrae, using aframe.
+
+# (old) Willowbrae
 
 3D VR room editor and projector
 
